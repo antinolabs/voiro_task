@@ -5,71 +5,97 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import ListModelMixin,CreateModelMixin,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin
+from rest_framework.mixins import ListModelMixin
 from .helpers import UserHelper
 
-class CR_ProfileAPIView(GenericAPIView,ListModelMixin):
-    authentication_classes=[]
-    queryset    =   Profile.objects.all()
-    serializer_class=ProfileSerializer
+class CR_ProfileAPIView(GenericAPIView, ListModelMixin):
+    authentication_classes = []
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
 
-    def get(self,request,*args,**kwargs):
-        return self.list(request,*args,**kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
     
-    def post(self,request,*args,**kwargs):
-        user_id =   self.request.data['user_id']
-        print('user id',request.data)
-        serialized_data=self.get_serializer(data=request.data)
-
-        if  serialized_data.is_valid():
-            serialized_data.save()
-                
-            return Response({"error":False,'data':serialized_data.data,"status_code":status.HTTP_201_CREATED})
+    def post(self, request, *args, **kwargs):
+        serialized_data = self.get_serializer(data=request.data)
         
-        return Response({"error":True,"msg":serialized_data.errors,"status_code":status.HTTP_400_BAD_REQUEST})
+        if serialized_data.is_valid():
+            serialized_data.save()
+            return Response(serialized_data.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serialized_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
 
 
 class RUD_ProfileAPIView(APIView):
 
-    def get(self,request,user_id=None):
+    def get(self, request, user_id=None):
+        user_details = UserHelper().getUserDetail(user_id)
 
-        user_details=UserHelper().getUserDetail(user_id)
+        if user_details['status_code'] != 200:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if user_details and 'username' in user_details:
-            user_profile    =   Profile.objects.filter(user_id=user_details['id']).first()
-            if user_profile:
-                data_to_serialize   ={}
-                # user data
-                data_to_serialize['user_id']=user_details['id']
-                data_to_serialize['username']=user_details['username']
-                data_to_serialize['user_created_at']=user_details['created_at']
-                data_to_serialize['user_updated_at']=user_details['updated_at']
+        try:
+            user_profile = Profile.objects.get(user_id=user_details['data']['id'])
+        except Profile.DoesNotExist:
+            return Response({"message": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({"message": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-                # profile data
-                data_to_serialize['firstname']=user_profile.firstname
-                data_to_serialize['lastname']=user_profile.lastname
-                data_to_serialize['role']=user_profile.role
-                data_to_serialize['dob']=user_profile.dob
-
-                serialized_data=GetProfileSerializer(data=data_to_serialize)
-                if serialized_data.is_valid():
-                    return Response({"error":False,"data":serialized_data.data,"status_code":status.HTTP_200_OK})
-                else:
-                    return Response({"error":False,"msg":"not able to serialize data","status_code":status.HTTP_400_BAD_REQUEST})
-                
-            else:
-                Response({"error":False,"msg":"profile not found","status_code":status.HTTP_404_NOT_FOUND})
+        data_to_serialize = {
             
-        return Response({"error":False,"msg":"user service failed","status_code":status.HTTP_424_FAILED_DEPENDENCY})
+            'user_id': user_details['data']['id'],
+            'email'  :  user_details['data']['email'],
+            'username': user_details['data']['username'],
+            'user_created_at': user_details['data']['created_at'],
+            'user_updated_at': user_details['data']['updated_at'],
+            'firstname': user_profile.firstname,
+            'lastname': user_profile.lastname,
+            'role': user_profile.role,
+            'dob': user_profile.dob,
+            'created_at':user_profile.created_at,
+            'updated_at':user_profile.updated_at
+        }
+
+        serialized_data = GetProfileSerializer(data_to_serialize)
+
+        return Response(serialized_data.data, status=status.HTTP_200_OK)
+    
+    
+    def patch(self, request, user_id=None, *args, **kwargs):
+        try:
+            profile = Profile.objects.get(user_id=user_id)
+        except Profile.DoesNotExist:
+            return Response({"message": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"message": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        try:
+            request.data['user_id'] = user_id
+            serializer = ProfileSerializer(profile, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": f"An error occurred while updating the profile: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-    def put(self,request,user_id):
-        pass
+    def delete(self, request, user_id=None, *args, **kwargs):
+        try:
+            profile = Profile.objects.get(user_id=user_id)
+        except Profile.DoesNotExist:
+            return Response({"message": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"message": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def delete(self,request,user_id):
-        pass
-
+        try:
+            profile.delete()
+            return Response({"message": "Profile deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"message": f"An error occurred while deleting the profile: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

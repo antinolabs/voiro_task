@@ -22,18 +22,16 @@ class RegisterApiView(GenericAPIView,ListModelMixin,CreateModelMixin):
         return self.list(request,*args,**kwargs)
     
     def post(self,request,*args,**kwargs):
-        serialized_data=self.get_serializer(data=request.data)
+        serializer=self.get_serializer(data=request.data)
 
-        if  serialized_data.is_valid():
-            serialized_data.save()
+        if  serializer.is_valid():
+            serializer.save()
                 
-            return Response({"error":False,'data':serialized_data.data,"status_code":status.HTTP_201_CREATED})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
-        return Response({"error":True,"msg":serialized_data.errors,"status_code":status.HTTP_400_BAD_REQUEST})
-
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 
-    
 
 
 class RUD_RegisterApi(GenericAPIView,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin):
