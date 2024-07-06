@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,8 +124,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+
+USER_SERVICE_HOST = os.environ.get('USER_SERVICE_HOST', 'userservice')
+USER_SERVICE_PORT = os.environ.get('PORT', '8000')
+
 STATIC_URL = 'static/'
+
+#for development purpose it's allows all
 CORS_ORIGIN_ALLOW_ALL = True
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

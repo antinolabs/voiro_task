@@ -1,26 +1,11 @@
-# import requests
-
-# class UserHelper:
-#     @staticmethod
-#     def getUserDetail(user_id):
-#         host="http://127.0.0.1:8001/"
-#         try:
-#             response=requests.get(host+"users/"+str(user_id))
-#             print('respnse user detail',response.status_code)
-#             print('json',response.json())
-#             return {"status_code":response.status_code,"data":response.json()}
-#         except Exception as e:
-#             return {"status_code":response.status_code,"data":None}
-
-        
-
-
+    
 import requests
+from django.conf import settings
 
 class UserHelper:
     @staticmethod
     def getUserDetail(user_id):
-        host = "http://userservice:8000/"
+        host = f"http://{settings.USER_SERVICE_HOST}:{settings.USER_SERVICE_PORT}/"
         endpoint = f"users/{user_id}"
 
         try:
