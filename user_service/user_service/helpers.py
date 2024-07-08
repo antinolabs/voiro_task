@@ -1,10 +1,5 @@
-# helpers.py
-
 import requests
 from django.conf import settings
-import os
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'user_service.settings')
 
 # if not settings.configured:
     # settings.configure()

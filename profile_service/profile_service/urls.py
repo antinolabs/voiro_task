@@ -20,7 +20,6 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('profile/',views.CR_ProfileAPIView.as_view(),name="profile"),
-    path('profile/<int:user_id>',views.RUD_ProfileAPIView.as_view(),name="profile")
-
+    path('profile/', views.CR_ProfileAPIView.as_view(), name="profile"),
+    path('profile/<int:user_id>/', views.RUD_ProfileAPIView.as_view(), name="profile-detail"),
 ]
