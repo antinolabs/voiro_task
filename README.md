@@ -2,6 +2,9 @@
 
 This project consists of two services, `user_service` and `profile_service`, running together using Docker Compose. Follow the steps below to set up and run the project.
 
+## API Documentation
+https://documenter.getpostman.com/view/36437082/2sA3e1BVVz
+
 ## Prerequisites
  
 Before running the project, ensure you have the following installed:
