@@ -8,6 +8,10 @@ from .serializers import *
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin,CreateModelMixin,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
+
 # Create your views here.
 # import requests
 
@@ -37,8 +41,7 @@ class RegisterApiView(GenericAPIView,ListModelMixin,CreateModelMixin):
 class RUD_RegisterApi(GenericAPIView,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin):
     queryset    =           User.objects.all()
     serializer_class    =   RUDUserSerializer
-    permission_classes     =   []
-    authentication_classes =   []
+    authentication_classes = [SessionAuthentication]
 
     lookup_field='id'
 
@@ -93,3 +96,18 @@ class LoginWithTokenAuthenticationAPIView(GenericAPIView):
         }
     }
         return Response(response)
+    
+
+class CheckTokenView(APIView):
+    authentication_classes =   []
+    def post(self, request, *args, **kwargs):
+        token = request.data.get('token')
+        if not token:
+            return Response({'detail': 'Token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token_obj = Token.objects.get(key=token)
+            user = token_obj.user
+            return Response({'valid': True, 'user_id': user.id, 'username': user.username})
+        except Token.DoesNotExist:
+            return Response({'valid': False, 'detail': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)

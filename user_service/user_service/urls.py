@@ -25,5 +25,6 @@ urlpatterns = [
     path('users/<int:id>',views.RUD_RegisterApi.as_view(),name='rud_users'),
 
     path('login/',views.LoginWithTokenAuthenticationAPIView.as_view()),
+    path('checktoken/',views.CheckTokenView.as_view()),
 
 ]

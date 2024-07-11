@@ -108,6 +108,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'profile_service.authentication.TokenCheckAuthentication',
+    ),
+  
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -125,7 +131,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-USER_SERVICE_HOST = os.environ.get('USER_SERVICE_HOST', 'userservice')
+USER_SERVICE_HOST = os.environ.get('USER_SERVICE_HOST', '127.0.0.1')
 USER_SERVICE_PORT = os.environ.get('PORT', '8000')
 
 STATIC_URL = 'static/'

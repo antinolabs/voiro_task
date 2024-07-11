@@ -7,9 +7,10 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
 from .helpers import UserHelper
+from rest_framework.permissions import IsAuthenticated
 
 class CR_ProfileAPIView(GenericAPIView, ListModelMixin):
-    authentication_classes = []
+
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
